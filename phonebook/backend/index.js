@@ -60,14 +60,17 @@ app.get('/api/persons', (request, response, next) => {
         .catch(error => next(error))
 })
 
-app.get('/info', (request, response) => {
-    const count = persons.length
-    const currentDate = new Date()
-
-    response.send(`
-        <p>Phonebook has info for ${count} people</p>
-        <p>${currentDate.toString()}</p>
-      `)
+app.get('/info', (request, response, next) => {
+    Person
+        .countDocuments()  
+        .then(count => {
+            const currentDate = new Date()
+            response.send(`
+                <p>Phonebook has info for ${count} people</p>
+                <p>${currentDate.toString()}</p>
+            `)
+        })
+        .catch(error => next(error))
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
