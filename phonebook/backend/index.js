@@ -37,9 +37,11 @@ let persons = [
 ]
 
 app.get('/api/persons', (request, response) => {
-    Person.find({}).then(persons => {
-        response.json(persons)
-    })  
+    Person
+        .find({})
+        .then(persons => {
+            response.json(persons)
+        })  
 })
 
 app.get('/info', (request, response) => {
@@ -79,21 +81,21 @@ app.post('/api/persons', (request, response) => {
             error: 'name or number missing' 
         })
     }
-    const dublicate = persons.find(person => person.name === body.name)
-    if (dublicate) {
-        return response.status(400).json({ 
-            error: 'name must be unique' 
+    Person
+        .find({name: body.name})
+        .then(persons => {
+            if(persons.length > 0) {
+                return response.status(400).json({error: 'name must be unique'})
+            }
+            const person = new Person({ 
+                name: body.name,
+                number: body.number
+            })
+     
+            person.save().then(savedPerson => {
+                response.json(savedPerson)
+            })
         })
-    }
-  
-    const person = {
-        id: String(Math.floor(Math.random() * 1e6)),  
-        name: body.name,
-        number: body.number
-    }
-    persons = persons.concat(person)
-    console.log(person)
-    response.json(person)
 })
 
 const PORT = process.env.PORT
