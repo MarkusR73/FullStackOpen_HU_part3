@@ -5,11 +5,11 @@ require('dotenv').config()
 
 const app = express()
 
+app.use(express.static('dist'))
+
 app.use(express.json())
 
 app.use(cors())
-
-app.use(express.static('dist'))
 
 morgan.token('body', (request) => {
     return JSON.stringify(request.body)
@@ -31,6 +31,16 @@ app.use(morgan((tokens, request, response) => {
         ].join(' '))
     }
 }))
+
+const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+    } 
+  
+    next(error)
+  }
 
 const Person = require('./models/person')
 let persons = [
@@ -54,23 +64,27 @@ app.get('/info', (request, response) => {
       `)
 })
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    const person = persons.find(person => person.id === id)
+app.get('/api/persons/:id', (request, response, next) => {
+    Person.findById(request.params.id)
+        .then(person => {
+            if (person) {
+                response.json(person)
+            }
+            else {
+                // if a note with the given id doesn't exist, the server will respond to the request with the HTTP status code 404 not found
+                response.status(404).end
+            }
+        })
+        // If the format of the id is incorrect, then we will end up in the error handler 
+        .catch(error => next(error))
+})
 
-    if (person) {
-        response.json(person)
-      } 
-      else {
-        response.status(404).end()
-      }
-  })
-
-app.delete('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    persons = persons.filter(person => person.id !== id)
-  
-    response.status(204).end()
+app.delete('/api/persons/:id', (request, response, next) => {
+    Person.findByIdAndDelete(request.params.id)
+        .then(result => {
+            response.status(204).end()
+        })
+        .catch(error => next(error))
 })
 
 app.post('/api/persons', (request, response) => {
@@ -97,6 +111,8 @@ app.post('/api/persons', (request, response) => {
             })
         })
 })
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
