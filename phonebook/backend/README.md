@@ -1,1 +1,1 @@
-https://backend-morning-night-5226.fly.dev/api/persons
+https://backend-morning-night-5226.fly.dev/
