@@ -35,10 +35,17 @@ app.use(morgan((tokens, request, response) => {
 const errorHandler = (error, request, response, next) => {
     console.error(error.message)
   
+    // CastError handling (malformed ID)
     if (error.name === 'CastError') {
       return response.status(400).send({ error: 'malformatted id' })
-    } 
+    }
+    
+    // Validation errors or duplicate entry handling
+    if (error.code === 11000) {
+        return response.status(400).json({ error: 'name must be unique' })
+    }
   
+    // If the error is not handled explicitly, pass it to the default error handler
     next(error)
   }
 
@@ -46,12 +53,11 @@ const Person = require('./models/person')
 let persons = [
 ]
 
-app.get('/api/persons', (request, response) => {
+app.get('/api/persons', (request, response, next) => {
     Person
         .find({})
-        .then(persons => {
-            response.json(persons)
-        })  
+        .then(persons => response.json(persons))
+        .catch(error => next(error))
 })
 
 app.get('/info', (request, response) => {
@@ -65,7 +71,8 @@ app.get('/info', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
-    Person.findById(request.params.id)
+    Person
+        .findById(request.params.id)
         .then(person => {
             if (person) {
                 response.json(person)
@@ -80,7 +87,8 @@ app.get('/api/persons/:id', (request, response, next) => {
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
-    Person.findByIdAndDelete(request.params.id)
+    Person
+        .findByIdAndDelete(request.params.id)
         .then(result => {
             response.status(204).end()
         })
@@ -97,8 +105,8 @@ app.post('/api/persons', (request, response) => {
     }
     Person
         .find({name: body.name})
-        .then(persons => {
-            if(persons.length > 0) {
+        .then(dublicates => {
+            if(dublicates.length > 0) {
                 return response.status(400).json({error: 'name must be unique'})
             }
             const person = new Person({ 
@@ -106,10 +114,13 @@ app.post('/api/persons', (request, response) => {
                 number: body.number
             })
      
-            person.save().then(savedPerson => {
-                response.json(savedPerson)
-            })
+            person
+                .save()
+                .then(savedPerson => {
+                    response.json(savedPerson)
+                })
         })
+        .catch(error => next(error))
 })
 
 app.use(errorHandler)
