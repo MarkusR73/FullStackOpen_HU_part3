@@ -46,6 +46,7 @@ const App = () => {
         personService
           .update(person.id, personObject)
           .then(returnedPerson => {
+            console.log('Updated person:', returnedPerson)
             setPersons(persons.map(p => p.id === person.id ? returnedPerson : p))
             setAddedMessage(`Updated ${newName.trim()}`)
             setTimeout(() => {setAddedMessage(null)}, 3000)

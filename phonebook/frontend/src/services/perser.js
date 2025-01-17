@@ -17,8 +17,13 @@ const remove = (id) => {
 }
 
 const update = (id, newObject) => {
+  console.log('Updating person with id:', id)
+  console.log('Data being sent:', newObject)
   const request = axios.put(`${baseUrl}/${id}`, newObject)
-  return request.then(response => response.data)
+  return request.then(response => {
+    console.log('Response from server:', response.data)
+    return response.data
+  })
 }
 
 export default {getAll, create, remove, update}
