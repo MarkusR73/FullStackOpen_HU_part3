@@ -10,7 +10,7 @@ const Added = ({ message }) => {
     )
   }
 
-  const Error = ({ message }) => {
+  const Error = ({message}) => {
     if (message === null) {
       return null
     }

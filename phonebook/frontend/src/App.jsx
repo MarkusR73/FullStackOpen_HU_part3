@@ -46,17 +46,22 @@ const App = () => {
         personService
           .update(person.id, personObject)
           .then(returnedPerson => {
-            console.log('Updated person:', returnedPerson)
-            setPersons(persons.map(p => p.id === person.id ? returnedPerson : p))
-            setAddedMessage(`Updated ${newName.trim()}`)
-            setTimeout(() => {setAddedMessage(null)}, 3000)
+            if (returnedPerson === null) {
+              setErrorMessage(`Information of '${newName.trim()}' has already been removed from server`)
+              setTimeout(() => {setErrorMessage(null)}, 5000)
+              setPersons(persons.filter(p => p.name !== newName.trim()))
+            }
+            else {
+              setPersons(persons.map(p => p.id === person.id ? returnedPerson : p))
+              setAddedMessage(`Updated ${newName.trim()}`)
+              setTimeout(() => {setAddedMessage(null)}, 3000)
+            }
             setNewName('')
             setNewNumber('')
           })
           .catch(error => {
-            setErrorMessage(`Information of '${newName.trim()}' has already been removed from server`)
+            setErrorMessage(error.error)
             setTimeout(() => {setErrorMessage(null)}, 5000)
-            setPersons(persons.filter(p => p.name !== newName.trim()))
           })
       }
       else {
@@ -78,6 +83,10 @@ const App = () => {
           setNewName('')
           setNewNumber('')
         })
+        .catch(error => {
+          setErrorMessage(error.error)
+          setTimeout(() => setErrorMessage(null), 5000)
+        })
     }
   }
 
@@ -90,7 +99,8 @@ const App = () => {
           setPersons(persons.filter(p => p.id !== person.id))
         })
         .catch(error => {
-          alert(`Failed to delete '${person.name}' from the server`);
+          setErrorMessage(error.error)
+          setTimeout(() => setErrorMessage(null), 5000)
         })
     }
   }

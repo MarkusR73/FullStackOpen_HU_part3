@@ -6,24 +6,36 @@ const getAll = () => {
   return request.then(response => response.data)
 }
 
-const create = newObject => {
-  const request = axios.post(baseUrl, newObject)
-  return request.then(response => response.data)
+const create = (newObject) => {
+  console.log('Entered create in perser.js')
+  return axios
+    .post(baseUrl, newObject)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      return Promise.reject(error.response ? error.response.data : error.message);
+    })
+  console.log("Exiting create in perser.js")
 }
 
 const remove = (id) => {
-  const request = axios.delete(`${baseUrl}/${id}`)
-  return request.then(response => response.data)
+  return axios
+    .delete(`${baseUrl}/${id}`)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      return Promise.reject(error.response ? error.response.data : error.message);
+    })
 }
 
 const update = (id, newObject) => {
-  console.log('Updating person with id:', id)
-  console.log('Data being sent:', newObject)
-  const request = axios.put(`${baseUrl}/${id}`, newObject)
-  return request.then(response => {
-    console.log('Response from server:', response.data)
-    return response.data
-  })
+  return axios
+    .put(`${baseUrl}/${id}`, newObject)
+    .then(response => response.data)
+    .catch(error => {
+      console.error('Error:', error.response ? error.response.data : error.message);
+      return Promise.reject(error.response ? error.response.data : error.message);
+    })
 }
 
 export default {getAll, create, remove, update}
