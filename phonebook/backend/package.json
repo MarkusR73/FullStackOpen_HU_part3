@@ -9,7 +9,8 @@
     "build:ui": "@powershell if (Test-Path dist) { Remove-Item -Recurse -Force dist } && cd ../frontend && npm run build && @powershell Copy-Item dist -Recurse ../backend",
     "deploy": "flyctl deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "flyctl logs"
+    "logs:prod": "flyctl logs",
+    "lint": "eslint ."
   },
   "author": "Markus Rautell",
   "license": "ISC",
@@ -22,7 +23,11 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.18.0",
     "@flydotio/dockerfile": "^0.7.0",
+    "@stylistic/eslint-plugin-js": "^2.13.0",
+    "eslint": "^9.18.0",
+    "globals": "^15.14.0",
     "nodemon": "^3.1.9"
   }
 }
